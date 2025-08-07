@@ -1,0 +1,110 @@
+from django.http import JsonResponse, HttpResponseRedirect,HttpResponse
+import sqlite3
+import json
+from datetime import datetime
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
+
+
+
+
+def get_db_connection():
+    conn = sqlite3.connect('db.sqlite3')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def index(request):
+    conn = get_db_connection()
+    tasks = conn.execute('SELECT * FROM task').fetchall()
+    conn.close()
+    return render(request, 'task_list.html', {'tasks': tasks})
+
+def add_task(request):
+    if request.method == 'POST':
+        title = request.POST['title']
+        description = request.POST['description']
+        due_date = request.POST['due_date']
+        status = request.POST['status']
+        conn = get_db_connection()
+        conn.execute('INSERT INTO task (title, description, due_date, status) VALUES (?, ?, ?, ?)',
+                     (title, description, due_date, status))
+        conn.commit()
+        conn.close()
+        return HttpResponseRedirect('/')
+    return render(request, 'add_task.html')
+
+def api_tasks(request):
+    if request.method == 'GET':
+        conn = get_db_connection()
+        tasks = conn.execute('SELECT * FROM task').fetchall()
+        conn.close()
+        return JsonResponse([dict(task) for task in tasks], safe=False)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        conn = get_db_connection()
+        conn.execute('INSERT INTO task (title, description, due_date, status) VALUES (?, ?, ?, ?)',
+                     (data['title'], data['description'], data['due_date'], data['status']))
+        conn.commit()
+        conn.close()
+        return JsonResponse({'message': 'Task created successfully.'}, status=201)
+
+def api_task_detail(request, task_id):
+    conn = get_db_connection()
+    if request.method == 'GET':
+        task = conn.execute('SELECT * FROM task WHERE id = ?', (task_id,)).fetchone()
+        conn.close()
+        if task:
+            return JsonResponse(dict(task))
+        else:
+            return JsonResponse({'error': 'Task not found'}, status=404)
+    elif request.method == 'PUT':
+        data = json.loads(request.body)
+        conn.execute('UPDATE task SET title=?, description=?, due_date=?, status=? WHERE id=?',
+                     (data['title'], data['description'], data['due_date'], data['status'], task_id))
+        conn.commit()
+        conn.close()
+        return JsonResponse({'message': 'Task updated successfully.'})
+    elif request.method == 'DELETE':
+        conn.execute('DELETE FROM task WHERE id=?', (task_id,))
+        conn.commit()
+        conn.close()
+        return JsonResponse({'message': 'Task deleted successfully.'})
+    
+def delete_task(request, task_id):
+    if request.method == 'POST':
+        conn = get_db_connection()
+        conn.execute('DELETE FROM task WHERE id = ?', (task_id,))
+        conn.commit()
+        conn.close()
+    return redirect('/')
+
+def update_status(request, task_id):
+    if request.method == 'POST':
+        conn = sqlite3.connect('db.sqlite3')
+        cursor = conn.cursor()
+
+        # Get current status
+        cursor.execute("SELECT status FROM task WHERE id = ?", (task_id,))
+        result = cursor.fetchone()
+        if not result:
+            conn.close()
+            return redirect(reverse('task_list'))  # fail gracefully
+
+        current_status = result[0]
+
+        # Toggle status
+        new_status = "Completed" if current_status == "Pending" else "Pending"
+        cursor.execute("UPDATE task SET status = ? WHERE id = ?", (new_status, task_id))
+        conn.commit()
+        conn.close()
+
+        return redirect(reverse('task_list'))  # ✅ this will correctly redirect to task list
+
+def completed_tasks(request):
+    conn = get_db_connection()
+    tasks = conn.execute('SELECT * FROM task WHERE status = "Completed"').fetchall()
+    conn.close()
+    return render(request, 'completed_tasks.html', {'tasks': tasks})
+
+
