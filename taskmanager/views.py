@@ -99,7 +99,7 @@ def update_status(request, task_id):
         conn.commit()
         conn.close()
 
-        return redirect(reverse('task_list'))  # ✅ this will correctly redirect to task list
+        return redirect(reverse('task_list'))  # this will correctly redirect to task list
 
 def completed_tasks(request):
     conn = get_db_connection()
