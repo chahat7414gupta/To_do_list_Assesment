@@ -2,22 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Task</title>
+    <title>Add Task - Toggle Dark/Light Mode</title>
     <style>
+        /* ✅ Theme Variables */
+        :root {
+            --bg-color: #ffffff;
+            --card-color: #ffffff;
+            --text-color: #000000;
+            --label-color: #333333;
+            --input-bg: #f8f9fa;
+            --input-border: #ccc;
+            --link-color: #0d6efd;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --label-color: #b0b0b0;
+            --input-bg: #2a2a2a;
+            --input-border: #444;
+            --link-color: #4dabf7;
+        }
+
+        /* ✅ Apply Theme Variables */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 50px auto;
             max-width: 600px;
             padding: 20px;
             border-radius: 12px;
-            background: #ffffff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            background: var(--card-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
         }
 
         h1 {
             text-align: center;
-            color: #343a40;
+            color: var(--text-color);
         }
 
         form {
@@ -29,15 +53,28 @@
         label {
             font-weight: bold;
             margin-bottom: 5px;
+            color: var(--label-color);
         }
 
         input[type="text"],
         input[type="date"],
         select {
             padding: 10px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--input-border);
             border-radius: 6px;
             font-size: 16px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        input[type="text"]::placeholder,
+        input[type="date"]::placeholder {
+            color: #888;
+        }
+
+        select option {
+            background-color: var(--input-bg);
+            color: var(--text-color);
         }
 
         input[type="submit"] {
@@ -64,28 +101,45 @@
             display: block;
             text-align: center;
             margin-top: 20px;
-            color: #007bff;
+            color: var(--link-color);
             text-decoration: none;
         }
 
         a:hover {
             text-decoration: underline;
         }
+
+        /* ✅ Toggle Button */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <!-- Dark/Light Mode Button -->
+    <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+
     <h1>Add New Task</h1>
     <form method="post">
         {% csrf_token %}
         
         <div class="form-group">
             <label for="title">Title:</label>
-            <input type="text" name="title" id="title" required>
+            <input type="text" name="title" id="title" required placeholder="Enter task title">
         </div>
 
         <div class="form-group">
             <label for="description">Description:</label>
-            <input type="text" name="description" id="description" required>
+            <input type="text" name="description" id="description" required placeholder="Enter task description">
         </div>
 
         <div class="form-group">
@@ -106,5 +160,29 @@
     </form>
 
     <a href="/">← Back to Task List</a>
+
+    <script>
+        // ✅ Toggle Theme
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            const btn = document.querySelector(".theme-toggle-btn");
+            if (document.body.classList.contains("dark-mode")) {
+                btn.textContent = "☀️ Light Mode";
+                localStorage.setItem("theme", "dark");
+            } else {
+                btn.textContent = "🌙 Dark Mode";
+                localStorage.setItem("theme", "light");
+            }
+        }
+
+        // ✅ Load Saved Theme
+        window.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                document.body.classList.add("dark-mode");
+                document.querySelector(".theme-toggle-btn").textContent = "☀️ Light Mode";
+            }
+        });
+    </script>
 </body>
 </html>
