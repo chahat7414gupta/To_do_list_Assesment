@@ -28,8 +28,7 @@ pip install django
 
 ### 2. Clone the Project
 ```bash
-git clone <your-repo-url>
-cd todo_project_Company
+git clone https://github.com/chahat7414gupta/To_do_list_Assesment.git
 ```
 
 ### 3. Create the Database Table (manual step)
@@ -112,7 +111,7 @@ Basic functionality is verified via browser and API requests.
 - ✅ CSRF protection enabled on all forms
 - ✅ Templates used for displaying and adding tasks
 - ✅ Task status toggle available from frontend
-- ❌ No authentication or user management
+
 
 ---
 
@@ -123,16 +122,7 @@ For testing or lightweight production:
 python manage.py runserver 0.0.0.0:8000
 ```
 
----
 
-## 🛠️ VS Code Extension to View Database
-
-- **SQLite** by Alex Covizzi  
-  🔗 https://marketplace.visualstudio.com/items?itemName=alexcvzz.vscode-sqlite
-
-Use it to view and modify `db.sqlite3` in GUI.
-
----
 
 ## 📁 Project Structure
 
@@ -153,5 +143,4 @@ todo_project_Company/
 ---
 
 ## 📬 Contact
-
-For any issues, feel free to raise an issue or contact the project owner.
+For any issues, feel free to raise an issue or contact the project owner [Chahat Gupta {chahatgupta1212@gmail.com}].
